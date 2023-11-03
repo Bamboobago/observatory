@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.108/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.108/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+  <style>
+    /* Add CSS to make the map container cover the entire viewport */
+    html, body {
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+    }
+    #cesiumContainer {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <script type="module">
+    // Your access token can be found at: https://ion.cesium.com/tokens.
+    // This is the default access token from your ion account
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwZjJiNzdmNC0xNWIyLTQ1NDItOGMzYy1lYzY5ZDBjOTE2YzMiLCJpZCI6MTY0NTUzLCJpYXQiOjE2OTM4OTYxNTB9.PvBMKFNMZabBKttAcs0uHCV9R413yz2cC9qMxeSmCcA';
+
+    const viewer = new Cesium.Viewer("cesiumContainer", {
+  terrainProvider: await Cesium.CesiumTerrainProvider.fromIonAssetId(
+    1
+  ),
+});
+viewer.scene.globe.depthTestAgainstTerrain = true;
+
+
+
+try {
+  const tileset = await Cesium.Cesium3DTileset.fromIonAssetId(2331952);
+  viewer.scene.primitives.add(tileset);
+  await viewer.zoomTo(tileset);
+
+  // Apply the default style if it exists
+  const extras = tileset.asset.extras;
+  if (
+    Cesium.defined(extras) &&
+    Cesium.defined(extras.ion) &&
+    Cesium.defined(extras.ion.defaultStyle)
+  ) {
+    tileset.style = new Cesium.Cesium3DTileStyle(extras.ion.defaultStyle);
+  }
+} catch (error) {
+  console.log(error);
+}
+ // Lock camera to a point
+const center = Cesium.Cartesian3.fromDegrees(
+  121.272102,
+  24.876551,
+  220.0426275055174
+);
+const transform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+viewer.scene.camera.lookAtTransform(
+  transform,
+  new Cesium.HeadingPitchRange(90, -Math.PI / 32, 40)
+);
+
+// Orbit this point
+viewer.clock.onTick.addEventListener(function (clock) {
+  viewer.scene.camera.rotateRight(0.005);
+});  
+
+    
+  </script>
+ </div>
+</body>
+</html>
